@@ -51,13 +51,31 @@ app.post('/api/login', (req, res) => {
 // ----------------------
 
 // 3. Get Courses API
+// --- SMART API: Get Courses (Filter by Teacher if needed) ---
 app.get('/api/courses', (req, res) => {
-    const sql = "SELECT * FROM courses";
-    db.query(sql, (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json(result);
+    const teacher_id = req.query.teacher_id;
+    
+    let sql = "SELECT * FROM courses";
+    let params = [];
+
+    // If a teacher_id is sent, filter the results!
+    if (teacher_id) {
+        sql += " WHERE teacher_id = ?";
+        params.push(teacher_id);
+    }
+
+    db.query(sql, params, (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// --- NEW API: Delete a Course ---
+app.delete('/api/courses/:id', (req, res) => {
+    const sql = "DELETE FROM courses WHERE id = ?";
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Deleted!" });
     });
 });
 
