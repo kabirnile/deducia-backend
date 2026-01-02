@@ -163,6 +163,53 @@ app.post('/api/signup', (req, res) => {
 });
 
 
+// --- PERSONALIZATION API 1: Get My Enrolled Batches ---
+app.get('/api/my-batches', (req, res) => {
+    const student_id = req.query.student_id;
+    const sql = `
+        SELECT courses.* FROM courses 
+        JOIN enrollments ON courses.id = enrollments.course_id 
+        WHERE enrollments.student_id = ?`;
+    
+    db.query(sql, [student_id], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// --- PERSONALIZATION API 2: Get My Test Scores ---
+app.get('/api/my-results', (req, res) => {
+    const student_id = req.query.student_id;
+    // Get test details along with the score
+    const sql = `
+        SELECT tests.title, results.score, results.total_marks, results.test_id 
+        FROM results 
+        JOIN tests ON results.test_id = tests.id 
+        WHERE results.student_id = ?`;
+
+    db.query(sql, [student_id], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// --- PERSONALIZATION API 3: Join a Batch (Free for now) ---
+app.post('/api/enroll', (req, res) => {
+    const { student_id, course_id } = req.body;
+    // Check if already enrolled to prevent duplicates
+    const checkSql = "SELECT * FROM enrollments WHERE student_id = ? AND course_id = ?";
+    db.query(checkSql, [student_id, course_id], (err, results) => {
+        if (results.length > 0) return res.json({ success: true, message: "Already Enrolled" });
+
+        const sql = "INSERT INTO enrollments (student_id, course_id) VALUES (?, ?)";
+        db.query(sql, [student_id, course_id], (err, result) => {
+            if (err) return res.status(500).json(err);
+            res.json({ success: true });
+        });
+    });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
