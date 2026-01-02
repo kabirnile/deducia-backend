@@ -133,6 +133,36 @@ app.get('/api/tests/:id/questions', (req, res) => {
         res.json(results);
     });
 });
+
+
+// --- SIGNUP API: Create a New Student ---
+app.post('/api/signup', (req, res) => {
+    const { phone, full_name } = req.body;
+    
+    // 1. Check if user already exists (Safety Check)
+    const checkSql = "SELECT * FROM users WHERE phone = ?";
+    db.query(checkSql, [phone], (err, results) => {
+        if (err) return res.status(500).json(err);
+        
+        if (results.length > 0) {
+            return res.json({ success: false, message: "User already exists. Please Login." });
+        }
+
+        // 2. Create the New User
+        const insertSql = "INSERT INTO users (phone, full_name, role) VALUES (?, ?, 'student')";
+        db.query(insertSql, [phone, full_name], (err, result) => {
+            if (err) return res.status(500).json(err);
+            
+            // 3. Return the new user data immediately so they can log in
+            res.json({ 
+                success: true, 
+                user: { id: result.insertId, phone, full_name, role: 'student' } 
+            });
+        });
+    });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
