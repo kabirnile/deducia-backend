@@ -62,6 +62,21 @@ app.get('/api/courses', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+// --- ADMIN API: Create a New Course ---
+app.post('/api/courses', (req, res) => {
+    // 1. Get data from the Admin Dashboard
+    const { title, description, thumbnail_url, video_url, notes_url } = req.body;
+
+    // 2. Insert into Database
+    const sql = "INSERT INTO courses (title, description, thumbnail_url, video_url, notes_url) VALUES (?, ?, ?, ?, ?)";
+    
+    db.query(sql, [title, description, thumbnail_url, video_url, notes_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, message: "Course Created Successfully!", id: result.insertId });
+    });
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
