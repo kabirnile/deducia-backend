@@ -81,14 +81,15 @@ app.delete('/api/courses/:id', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 // --- ADMIN API: Create a New Course ---
+// --- ADMIN API: Create a New Course (With Teacher Tag) ---
 app.post('/api/courses', (req, res) => {
-    // 1. Get data from the Admin Dashboard
-    const { title, description, thumbnail_url, video_url, notes_url } = req.body;
+    // 1. Get data including the NEW teacher_id
+    const { title, description, thumbnail_url, video_url, notes_url, teacher_id } = req.body;
 
-    // 2. Insert into Database
-    const sql = "INSERT INTO courses (title, description, thumbnail_url, video_url, notes_url) VALUES (?, ?, ?, ?, ?)";
+    // 2. Insert into Database (Now including the tag)
+    const sql = "INSERT INTO courses (title, description, thumbnail_url, video_url, notes_url, teacher_id) VALUES (?, ?, ?, ?, ?, ?)";
     
-    db.query(sql, [title, description, thumbnail_url, video_url, notes_url], (err, result) => {
+    db.query(sql, [title, description, thumbnail_url, video_url, notes_url, teacher_id], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
