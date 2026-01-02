@@ -96,6 +96,43 @@ app.post('/api/courses', (req, res) => {
         res.json({ success: true, message: "Course Created Successfully!", id: result.insertId });
     });
 });
+
+// --- EXAM API 1: Create a Test ---
+app.post('/api/tests', (req, res) => {
+    const { title, duration_minutes, teacher_id } = req.body;
+    const sql = "INSERT INTO tests (title, duration_minutes, teacher_id) VALUES (?, ?, ?)";
+    db.query(sql, [title, duration_minutes, teacher_id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, id: result.insertId });
+    });
+});
+
+// --- EXAM API 2: Add a Question to a Test ---
+app.post('/api/questions', (req, res) => {
+    const { test_id, question_text, option_a, option_b, option_c, option_d, correct_option } = req.body;
+    const sql = "INSERT INTO questions (test_id, question_text, option_a, option_b, option_c, option_d, correct_option) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    db.query(sql, [test_id, question_text, option_a, option_b, option_c, option_d, correct_option], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true });
+    });
+});
+
+// --- EXAM API 3: Get All Tests (For Student Dashboard) ---
+app.get('/api/tests', (req, res) => {
+    db.query("SELECT * FROM tests", (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// --- EXAM API 4: Get Specific Test Questions (When Student starts) ---
+app.get('/api/tests/:id/questions', (req, res) => {
+    const sql = "SELECT * FROM questions WHERE test_id = ?";
+    db.query(sql, [req.params.id], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
