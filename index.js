@@ -210,6 +210,27 @@ app.post('/api/enroll', (req, res) => {
 });
 
 
+// --- MENTORSHIP API: Student Requests a Mentor ---
+app.post('/api/mentor-request', (req, res) => {
+    const { student_id, subject, issue, preferred_time } = req.body;
+    const sql = "INSERT INTO mentor_requests (student_id, subject, issue, preferred_time) VALUES (?, ?, ?, ?)";
+    db.query(sql, [student_id, subject, issue, preferred_time], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Request Sent! Our team will call you." });
+    });
+});
+
+// --- CONTACT API: Student sends a message ---
+app.post('/api/contact', (req, res) => {
+    const { name, phone, message } = req.body;
+    const sql = "INSERT INTO support_messages (name, phone, message) VALUES (?, ?, ?)";
+    db.query(sql, [name, phone, message], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Message Received! Ticket #"+result.insertId });
+    });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
