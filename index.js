@@ -254,7 +254,25 @@ app.post('/api/add-course', (req, res) => {
     });
 });
 
-;
+
+// --- NOTES: Get All Notes ---
+app.get('/api/notes', (req, res) => {
+    const sql = "SELECT * FROM notes ORDER BY uploaded_at DESC";
+    db.query(sql, (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+// --- NOTES: Teacher Uploads a Note ---
+app.post('/api/add-note', (req, res) => {
+    const { title, subject, pdf_url } = req.body;
+    const sql = "INSERT INTO notes (title, subject, pdf_url) VALUES (?, ?, ?)";
+    db.query(sql, [title, subject, pdf_url], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Note Uploaded!" });
+    });
+});
 
 
 app.listen(PORT, () => {
