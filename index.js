@@ -254,6 +254,30 @@ app.post('/api/add-course', (req, res) => {
     });
 });
 
+// --- TEACHER DASHBOARD: Get all Student Requests ---
+app.get('/api/teacher/requests', (req, res) => {
+    const sql = `
+        SELECT mentor_requests.*, users.full_name, users.phone 
+        FROM mentor_requests 
+        JOIN users ON mentor_requests.student_id = users.id 
+        ORDER BY request_date DESC
+    `;
+    db.query(sql, (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
+});
+
+// --- ADMIN: Add a New Course (No more SQL!) ---
+app.post('/api/add-course', (req, res) => {
+    const { title, description, thumbnail_url, video_url } = req.body;
+    const sql = "INSERT INTO courses (title, description, thumbnail_url, video_url) VALUES (?, ?, ?, ?)";
+    db.query(sql, [title, description, thumbnail_url, video_url], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Course Launched!" });
+    });
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
